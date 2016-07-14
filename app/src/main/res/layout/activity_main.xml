@@ -1,0 +1,83 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:id="@+id/fl"
+        android:layout_above="@+id/linaer1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SurfaceView
+                android:id="@+id/surface1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"/>
+
+            <SeekBar
+                android:layout_alignParentBottom="true"
+                android:id="@+id/skbProgress"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:max="100"
+                android:maxHeight="6.0dip"
+                android:minHeight="6.0dip"
+                android:paddingLeft="8dip"
+                android:paddingRight="8dip"
+                android:thumbOffset="48px"/>
+
+        </RelativeLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="20sp"/>
+
+    <LinearLayout
+        android:id="@+id/linaer1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加密视频"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/start2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="原始视频"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/pre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂停"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重播"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
