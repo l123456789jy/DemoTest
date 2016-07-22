@@ -8,13 +8,19 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/andserver" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/ijkplayer-exo" />
+            <option value="$PROJECT_DIR$/ijkplayer-java" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/andserver" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/ijkplayer-exo" />
+            <option value="$PROJECT_DIR$/ijkplayer-java" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -1,5 +1,7 @@
 package com.example.administrator.demotest;
 
+import android.content.Intent;
+import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -12,13 +14,21 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import com.example.administrator.demotest.nohttp.MyHttpd;
+import fi.iki.elonen.NanoHTTPD;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.net.ssl.KeyManagerFactory;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener,
-        MediaPlayer.OnBufferingUpdateListener {
-
+public class MainActivity extends AppCompatActivity
+        implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener {
     private SurfaceView surface1;
     private Button start, stop, pre;
     private MediaPlayer mediaPlayer1;
@@ -26,11 +36,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int postion = 0;
     LinearLayout linaer1;
     Button start2;
-    SeekBar   skbProgress;
-    boolean isperson=false;
+    SeekBar skbProgress;
+    boolean isperson = false;
+    Intent mIntent;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         surface1 = (SurfaceView) findViewById(R.id.surface1);
@@ -54,16 +64,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         surface1.setOnClickListener(this);
         tv_title.setText("正在播放加密视频");
 
-
         mediaPlayer1.setOnBufferingUpdateListener(this);
 
+        try {
+            openSersice();
+        } catch (IOException e) {
+            Log.e("IOException", "Couldn't start server:\n" + e.getMessage());
+        }
+    }
+
+    static {
+        //for localhost testing only
+        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
+                new javax.net.ssl.HostnameVerifier(){
+
+                    public boolean verify(String hostname,
+                                          javax.net.ssl.SSLSession sslSession) {
+                        if (hostname.equals("localhost")) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+    }
+    /**
+     * 开启本地服务
+     */
+    private void openSersice() throws IOException {
+
+        try {
+            AssetManager am = getAssets();
+            //InputStream ins1 = am.open("server.cer");
+            InputStream ins2 = am.open("android.kbs");
+            MyHttpd myHttpd = new MyHttpd();
+
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(ins2, "android".toCharArray());
+
+
+            //读取证书
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, "android".toCharArray());
+
+            myHttpd.makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore, keyManagerFactory), null);
+            myHttpd.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+
+
+        } catch (IOException e) {
+            Log.e("IOException", "Couldn't start server:\n" + e.getMessage());
+        } catch (NumberFormatException e) {
+            Log.e("NumberFormatException", e.getMessage());
+        } catch (KeyStoreException | NoSuchAlgorithmException e) {
+            Log.e("HTTPSException", "HTTPS certificate error:\n " + e.getMessage());
+        } catch (UnrecoverableKeyException e) {
+            Log.e("UnrecoverableKeyException", "UnrecoverableKeyException" + e.getMessage());
+        }   catch (CertificateException e) {
+            e.printStackTrace();
+        }
     }
 
 
 
 
-    @Override
-    public void onClick(View v) {
+    @Override public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start:
                 try {
@@ -89,7 +152,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     mediaPlayer1.reset();
                     mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer1.setDataSource("");
+                    mediaPlayer1.setDataSource(
+                            "http://media.assets.bdqn.cn/test/1102/unencrypted/segments.m3u8");
                     // 把视频输出到SurfaceView上
                     mediaPlayer1.setDisplay(surface1.getHolder());
                     mediaPlayer1.prepare();
@@ -104,12 +168,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.pre:
                 if (mediaPlayer1.isPlaying()) {
                     mediaPlayer1.pause();
-                } else {
+                }
+                else {
                     mediaPlayer1.start();
                 }
                 break;
             case R.id.stop:  //重播
-                if (mediaPlayer1.isPlaying()){
+                if (mediaPlayer1.isPlaying()) {
                     mediaPlayer1.seekTo(0);
                     mediaPlayer1.start();
                     initDation();
@@ -119,23 +184,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //点击全屏
             case R.id.surface1:
-                if (linaer1.isShown()){
+                if (linaer1.isShown()) {
                     linaer1.setVisibility(View.GONE);
-                }else{
+                }
+                else {
                     linaer1.setVisibility(View.VISIBLE);
                 }
                 break;
             default:
                 break;
         }
-
     }
+
 
     public void play() throws IllegalArgumentException, SecurityException,
                               IllegalStateException, IOException {
         mediaPlayer1.reset();
         mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer1.setDataSource("");
+
+
+       //mediaPlayer1.setDataSource("http://course.assets.bdqn" +
+       //         ".cn:4477/test/1102/test/segments.m3u8");
+
+
+       //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
+
+
+        mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
 
         // 把视频输出到SurfaceView上
         mediaPlayer1.setDisplay(surface1.getHolder());
@@ -152,38 +227,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //更新进度
         new Timer().schedule(new TimerTask() {
 
-            @Override
-            public void run() {
-                if (isperson == true)
-                    return;
+            @Override public void run() {
+                if (isperson == true) return;
                 skbProgress.setProgress(mediaPlayer1.getCurrentPosition());
             }
         }, 0, 10);
     }
 
 
-    @Override public void onBufferingUpdate(MediaPlayer mp, int bufferingProgress) {
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int bufferingProgress) {
         Log.e("onbuffer", "onBuffer: " + bufferingProgress);
-     int   secondaryProgress = (int) (skbProgress.getMax() * bufferingProgress / 100);
+        int secondaryProgress = (int) (
+                skbProgress.getMax() * bufferingProgress / 100);
         skbProgress.setSecondaryProgress(secondaryProgress);
     }
-
 
 
     private class SurfaceViewLis implements SurfaceHolder.Callback {
 
         @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                                   int height) {
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
         }
 
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
+
+        @Override public void surfaceCreated(SurfaceHolder holder) {
             if (postion == 0) {
                 try {
-                    play();
-                    mediaPlayer1.seekTo(postion);
+                    //play();
+                    //mediaPlayer1.seekTo(postion);
                 } catch (IllegalArgumentException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -193,50 +266,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (IllegalStateException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
             }
-
         }
 
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
+
+        @Override public void surfaceDestroyed(SurfaceHolder holder) {
 
         }
-
     }
-
 
     class SeekBarChangeEvent implements SeekBar.OnSeekBarChangeListener {
 
-
         @Override
-        public void onProgressChanged(SeekBar seekBar, int progress,
-                                      boolean fromUser) {
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
         }
 
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-         int   currentPlay = seekBar.getProgress();
+
+        @Override public void onStopTrackingTouch(SeekBar seekBar) {
+            int currentPlay = seekBar.getProgress();
             mediaPlayer1.seekTo(currentPlay);
             isperson = false;
         }
 
-        @Override
-        public void onStartTrackingTouch(SeekBar arg0) {
+
+        @Override public void onStartTrackingTouch(SeekBar arg0) {
             isperson = true;
         }
     }
 
 
-
-
-    @Override
-    protected void onPause() {
+    @Override protected void onPause() {
         if (mediaPlayer1.isPlaying()) {
             // 保存当前播放的位置
             postion = mediaPlayer1.getCurrentPosition();
@@ -245,12 +309,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (mediaPlayer1.isPlaying())
-            mediaPlayer1.stop();
+
+    @Override protected void onDestroy() {
+        if (mediaPlayer1.isPlaying()) mediaPlayer1.stop();
         mediaPlayer1.release();
         super.onDestroy();
     }
+
 
 }

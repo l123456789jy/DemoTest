@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DemoTest.iml" filepath="$PROJECT_DIR$/DemoTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/andserver/andserver.iml" filepath="$PROJECT_DIR$/andserver/andserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ijkplayer-exo/ijkplayer-exo.iml" filepath="$PROJECT_DIR$/ijkplayer-exo/ijkplayer-exo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ijkplayer-java/ijkplayer-java.iml" filepath="$PROJECT_DIR$/ijkplayer-java/ijkplayer-java.iml" />
     </modules>
   </component>
 </project>
