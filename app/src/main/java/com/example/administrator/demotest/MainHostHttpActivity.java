@@ -1,7 +1,5 @@
 package com.example.administrator.demotest;
 
-import android.content.Intent;
-import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -14,20 +12,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import com.example.administrator.demotest.nohttp.MyHttpd;
-import fi.iki.elonen.NanoHTTPD;
+import com.example.administrator.demotest.nohttp.UAsetHttpServer;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.net.ssl.KeyManagerFactory;
 
-public class MainActivity extends AppCompatActivity
+/**
+ * 实现http
+ */
+public class MainHostHttpActivity extends AppCompatActivity
         implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener {
     private SurfaceView surface1;
     private Button start, stop, pre;
@@ -38,7 +31,8 @@ public class MainActivity extends AppCompatActivity
     Button start2;
     SeekBar skbProgress;
     boolean isperson = false;
-    Intent mIntent;
+    UAsetHttpServer myHttp;
+
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,64 +60,22 @@ public class MainActivity extends AppCompatActivity
 
         mediaPlayer1.setOnBufferingUpdateListener(this);
 
-        try {
-            openSersice();
-        } catch (IOException e) {
-            Log.e("IOException", "Couldn't start server:\n" + e.getMessage());
-        }
+        openSersice();
     }
 
-    static {
-        //for localhost testing only
-        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-                new javax.net.ssl.HostnameVerifier(){
 
-                    public boolean verify(String hostname,
-                                          javax.net.ssl.SSLSession sslSession) {
-                        if (hostname.equals("localhost")) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-    }
     /**
      * 开启本地服务
      */
-    private void openSersice() throws IOException {
-
+    private void openSersice() {
+        myHttp = new UAsetHttpServer(MainHostHttpActivity.this);
         try {
-            AssetManager am = getAssets();
-            //InputStream ins1 = am.open("server.cer");
-            InputStream ins2 = am.open("android.kbs");
-            MyHttpd myHttpd = new MyHttpd();
-
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(ins2, "android".toCharArray());
-
-
-            //读取证书
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, "android".toCharArray());
-
-            myHttpd.makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore, keyManagerFactory), null);
-            myHttpd.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-
-
+            myHttp.start();
         } catch (IOException e) {
-            Log.e("IOException", "Couldn't start server:\n" + e.getMessage());
-        } catch (NumberFormatException e) {
-            Log.e("NumberFormatException", e.getMessage());
-        } catch (KeyStoreException | NoSuchAlgorithmException e) {
-            Log.e("HTTPSException", "HTTPS certificate error:\n " + e.getMessage());
-        } catch (UnrecoverableKeyException e) {
-            Log.e("UnrecoverableKeyException", "UnrecoverableKeyException" + e.getMessage());
-        }   catch (CertificateException e) {
+            Log.e("http", "http服务运行错误" + e.getMessage());
             e.printStackTrace();
         }
     }
-
-
 
 
     @Override public void onClick(View v) {
@@ -202,15 +154,11 @@ public class MainActivity extends AppCompatActivity
         mediaPlayer1.reset();
         mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
+        mediaPlayer1.setDataSource("http://localhost:4477");
 
-       //mediaPlayer1.setDataSource("http://course.assets.bdqn" +
-       //         ".cn:4477/test/1102/test/segments.m3u8");
+        //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
 
-
-       //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
-
-
-        mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
+        //mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
 
         // 把视频输出到SurfaceView上
         mediaPlayer1.setDisplay(surface1.getHolder());
@@ -311,10 +259,12 @@ public class MainActivity extends AppCompatActivity
 
 
     @Override protected void onDestroy() {
-        if (mediaPlayer1.isPlaying()) mediaPlayer1.stop();
-        mediaPlayer1.release();
+        if (mediaPlayer1.isPlaying()) {
+            mediaPlayer1.stop();
+            mediaPlayer1.release();
+        }
+        myHttp.stop();
+        Log.e("http", "http服务停止");
         super.onDestroy();
     }
-
-
 }

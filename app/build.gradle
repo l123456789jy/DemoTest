@@ -34,5 +34,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-appindexing:8.1.0'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.9'
     compile files('libs/xUtils-2.6.14.jar')
-    compile 'org.nanohttpd:nanohttpd:2.2.0'
+    compile 'com.github.lazylibrary:lazylibrary:1.0.2'
+//    compile 'org.nanohttpd:nanohttpd:2.2.0'
+    compile 'com.nanohttpd:nanohttpd:2.1.1'
+
 }

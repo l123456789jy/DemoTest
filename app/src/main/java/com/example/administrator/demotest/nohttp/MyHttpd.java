@@ -16,10 +16,11 @@ public class MyHttpd extends NanoHTTPD{
     }
     @Override
     public Response serve(IHTTPSession session) {
-        Method method = session.getMethod();
+      /*  Method method = session.getMethod();
         String uri = session.getUri();
         Log.e("jltxgcy", method+"  "+uri);
-        return newFixedLengthResponse("Hello server");
+        return newFixedLengthResponse("Hello server");*/
+        return null;
     }
 
 }
