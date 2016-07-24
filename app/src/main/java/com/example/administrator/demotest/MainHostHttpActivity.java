@@ -154,11 +154,11 @@ public class MainHostHttpActivity extends AppCompatActivity
         mediaPlayer1.reset();
         mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-        mediaPlayer1.setDataSource("http://localhost:4477");
+//        mediaPlayer1.setDataSource("http://localhost:4477");
 
         //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
 
-        //mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
+        mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
 
         // 把视频输出到SurfaceView上
         mediaPlayer1.setDisplay(surface1.getHolder());
