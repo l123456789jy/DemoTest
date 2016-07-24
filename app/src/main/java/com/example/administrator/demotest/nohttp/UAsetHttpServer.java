@@ -1,8 +1,13 @@
 package com.example.administrator.demotest.nohttp;
 
 import android.util.Log;
+
 import com.example.administrator.demotest.MainHostHttpActivity;
 import com.example.administrator.demotest.constant.Directory;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import fi.iki.elonen.NanoHTTPD;
 
 /**
@@ -19,27 +24,16 @@ public class UAsetHttpServer extends NanoHTTPD {
     @Override
     public Response serve(IHTTPSession session) {
         String path = Directory.DOWN_LODE_APF_PATH.toString();
-
-
-       /* if(session.getUri().equals("/")){
-            String ua = session.getHeaders().get("user-agent");
-            try{
-
-                FileOutputStream fs = new FileOutputStream(path);
-                OutputStreamWriter ow = new OutputStreamWriter(fs);
-                ow.write(ua);
-                ow.close();
-                Log.e("读取文件完毕","UAsetHttpServer, save useragent to file " +
-                        "successfully.");
-
-            }catch(Exception e){
-                Log.e("读取文件出错",e.getMessage());
-            }
-        }*/
-
+        Log.e("视频路径",path);
         Log.e("http",session.getUri());
-
-            return new Response(Response.Status.OK,NanoHTTPD.MIME_PLAINTEXT,
-                    path+"segments.m3u8");
+        try {
+            FileInputStream fis = new FileInputStream("/storage/emulated/0/kgc/apk/segments0.ts");
+            return new NanoHTTPD.Response(Response.Status.OK, "video/mp4", fis);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.e("Error",e.getMessage());
+            return new Response("Error");
+        }
     }
 }
