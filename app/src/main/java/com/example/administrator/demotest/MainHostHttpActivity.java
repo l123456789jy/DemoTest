@@ -12,7 +12,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import com.example.administrator.demotest.constant.Directory;
 import com.example.administrator.demotest.nohttp.UAsetHttpServer;
+import com.github.lazylibrary.util.FileUtils;
+import com.github.lazylibrary.util.ZipUtil;
+import java.io.File;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,6 +26,10 @@ import java.util.TimerTask;
  */
 public class MainHostHttpActivity extends AppCompatActivity
         implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener {
+    public String DOWNLOAD_URI="http://media.assets.bdqn" +
+            ".cn/test/1102/test1/test1.tar.gz";
+    String path = Directory.DOWN_LODE_APF_PATH.toString();
+
     private SurfaceView surface1;
     private Button start, stop, pre;
     private MediaPlayer mediaPlayer1;
@@ -56,11 +64,85 @@ public class MainHostHttpActivity extends AppCompatActivity
         pre.setOnClickListener(this);
         start2.setOnClickListener(this);
         surface1.setOnClickListener(this);
-        tv_title.setText("正在播放加密视频");
+        tv_title.setText("正在播放缓存的加密视频");
 
         mediaPlayer1.setOnBufferingUpdateListener(this);
 
         openSersice();
+        downLoade();
+    }
+
+
+    /**
+     * 下载需要缓存的视频文件压缩包
+     */
+    private void downLoade() {
+        start.setEnabled(false);
+        new Thread() {
+            @Override public void run() {
+                super.run();
+                copayAssetsToSdCard();
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        start.setEnabled(true);
+                    }
+                });
+            }
+        }.start();
+
+       /* HttpUtils mhttpUtils = new HttpUtils();
+        boolean fileExist = FileUtils.isFileExist(path + "a.zip");
+        if (fileExist){
+            Toast.makeText(MainHostHttpActivity.this,"视频已经缓存",Toast
+                    .LENGTH_SHORT).show();
+            return;
+        }
+
+        mhttpUtils.download(DOWNLOAD_URI, path+"a.tar.gz", true, false, new
+                RequestCallBack<File>() {
+            @Override
+            public void onStart() {
+                Toast.makeText(MainHostHttpActivity.this,"开始下载视频文件",Toast
+                        .LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLoading(long total, long current, boolean isUploading) {
+                Log.e("已经下载",current + "/" + total);
+            }
+            @Override public void onSuccess(ResponseInfo<File> responseInfo) {
+                try {
+                    GZipUtils.decompress(new File(path+"a.tar.gz"));
+                } catch (Exception e) {
+                    Log.e("GZipUtils",e.getMessage());
+
+                }
+                Toast.makeText(MainHostHttpActivity.this,"视频下载成功,开始解压。",Toast.LENGTH_SHORT).show();
+            }
+            @Override public void onFailure(HttpException e, String s) {
+                Toast.makeText(MainHostHttpActivity.this,s,Toast
+                        .LENGTH_SHORT).show();
+                Log.e("onFailure",s);
+            }
+        });*/
+    }
+
+
+    /**
+     * 拷贝并且解压
+     */
+    private void copayAssetsToSdCard() {
+        boolean fileExist = FileUtils.isFileExist(path+"a.zip");
+        if(fileExist!=true){
+            FileUtils.makeDirs(path);
+            Log.e("拷贝","目录不存在创建完毕");
+            boolean b = FileUtils.copyAssetToSDCard(getAssets(), "a.zip", path + "a.zip");
+            if (b) {
+                Log.e("拷贝", "拷贝压缩文件到sd卡成功！");
+                ZipUtil.upZipFile(new File(path + "a.zip"), path);
+                Log.e("拷贝", "解压完毕");
+            }
+        }
     }
 
 
@@ -82,7 +164,7 @@ public class MainHostHttpActivity extends AppCompatActivity
         switch (v.getId()) {
             case R.id.start:
                 try {
-                    tv_title.setText("正在播放加密视频");
+                    tv_title.setText("正在播放缓存的加密视频");
 
                     play();
                 } catch (IllegalArgumentException e) {
@@ -158,7 +240,7 @@ public class MainHostHttpActivity extends AppCompatActivity
 
         //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
 
-        mediaPlayer1.setDataSource("http://media.assets.bdqn.cn/test/1102/test/segments.m3u8");
+        mediaPlayer1.setDataSource("http://127.0.0.1:4477/test/1102/test/segments.m3u8");
 
         // 把视频输出到SurfaceView上
         mediaPlayer1.setDisplay(surface1.getHolder());

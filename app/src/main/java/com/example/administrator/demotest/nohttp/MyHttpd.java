@@ -11,16 +11,14 @@ public class MyHttpd extends NanoHTTPD{
 
     public MyHttpd() {
         super(4477);
-            //start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-            Log.e("MyHttpd","服务运行");
+            Log.e("MyHttpd","https服务运行");
     }
     @Override
     public Response serve(IHTTPSession session) {
-      /*  Method method = session.getMethod();
+        Method method = session.getMethod();
         String uri = session.getUri();
         Log.e("jltxgcy", method+"  "+uri);
-        return newFixedLengthResponse("Hello server");*/
-        return null;
+        return new Response("Hello server");
     }
 
 }

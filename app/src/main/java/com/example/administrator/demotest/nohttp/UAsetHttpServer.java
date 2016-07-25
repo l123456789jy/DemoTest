@@ -15,32 +15,45 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class UAsetHttpServer extends NanoHTTPD {
     MainHostHttpActivity mainHostHttpActivity;
-    public UAsetHttpServer(MainHostHttpActivity mainHostHttpActivity)  {
+
+
+    public UAsetHttpServer(MainHostHttpActivity mainHostHttpActivity) {
         super(4477);
-        this.mainHostHttpActivity=mainHostHttpActivity;
+        this.mainHostHttpActivity = mainHostHttpActivity;
     }
 
-    @Override
-    public Response serve(IHTTPSession session) {
+
+    @Override public Response serve(IHTTPSession session) {
         String path = Directory.DOWN_LODE_APF_PATH.toString();
         String uri = session.getUri();
-        Log.e("访问的地址",uri);
+        Log.e("访问的地址", uri);
 
         try {
-            //代表是访问加密的key,把视频加密的key反给播放器
-            if (uri.endsWith("segments.key")){
-                FileInputStream fis = new FileInputStream("/storage/emulated/0/kgc/apk/segments.key");
-                return new NanoHTTPD.Response(Response.Status.OK, "video/mp4", fis);
-            }else {
-                //然后在反播放的视频，每当播放完一个片段播放器就会请求拿去下一个视频片段
-                FileInputStream fis = new FileInputStream("/storage/emulated/0/kgc/apk/segments1.ts");
+            //代表是访问本地缓存的m3u8文件，返给播放器
+            if (uri.endsWith("segments.m3u8")) {
+                FileInputStream fis = new FileInputStream(
+                        "/storage/emulated/0/kgc/apk/segments.m3u8");
                 return new NanoHTTPD.Response(Response.Status.OK, "video/mp4", fis);
             }
 
-        }
-        catch (Exception e) {
+            //代表是访问加密的key,把视频加密的key反给播放器
+            if (uri.endsWith("segments.key")) {
+                FileInputStream fis = new FileInputStream(
+                        "/storage/emulated/0/kgc/apk/segments.key");
+                return new NanoHTTPD.Response(Response.Status.OK, "video/mp4",
+                        fis);
+            }
+            else {
+                //然后在反播放的视频，每当播放完一个片段播放器就会请求拿去下一个视频片段
+                FileInputStream fis = new FileInputStream
+                        ("/storage/emulated/0/kgc/apk/" + uri.split("/")[uri
+                                .split("/").length-1]);
+                return new NanoHTTPD.Response(Response.Status.OK, "video/mp4",
+                        fis);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.e("Error",e.getMessage());
+            Log.e("Error", e.getMessage());
             return new Response("Error");
         }
     }
