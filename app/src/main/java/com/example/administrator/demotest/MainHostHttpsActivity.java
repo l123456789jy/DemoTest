@@ -194,7 +194,7 @@ public class MainHostHttpsActivity extends AppCompatActivity implements View.OnC
         mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
 
-       mediaPlayer1.setDataSource("https://www.localhost:4477");
+       mediaPlayer1.setDataSource("https://localhost:4477");
 
        //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
 
