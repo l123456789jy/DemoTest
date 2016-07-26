@@ -1,6 +1,7 @@
 package com.example.administrator.demotest;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -13,9 +14,18 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import com.example.administrator.demotest.nohttp.MyHttpd;
+import fi.iki.elonen.NanoHTTPD;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.net.ssl.KeyManagerFactory;
 
 /**
  * 实现https
@@ -65,37 +75,25 @@ public class MainHostHttpsActivity extends AppCompatActivity implements View.OnC
         }
     }
 
-    static {
-        //for localhost testing only
-        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-                new javax.net.ssl.HostnameVerifier(){
 
-                    public boolean verify(String hostname,
-                                          javax.net.ssl.SSLSession sslSession) {
-                        if (hostname.equals("localhost")) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-    }
     /**
      * 开启本地服务
      */
     private void openSersice() throws IOException {
 
-      /*  try {
+        try {
             AssetManager am = getAssets();
-            //InputStream ins1 = am.open("server.cer");
-            InputStream ins2 = am.open("android.kbs");
+            InputStream ins2 = am.open("a.kbs");
             MyHttpd myHttpd = new MyHttpd();
 
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore keyStore = KeyStore.getInstance("BKS");
             keyStore.load(ins2, null);
 
-            //读取证书,注意这里的密码必须设置
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, "android".toCharArray());
+
+            //读取证书,注意这里的密码必须设置为证书的密码
+            KeyManagerFactory
+                    keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, "beidaQN20160".toCharArray());
 
             myHttpd.makeSecure(NanoHTTPD.makeSSLSocketFactory(keyStore, keyManagerFactory), null);
             myHttpd.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
@@ -111,7 +109,7 @@ public class MainHostHttpsActivity extends AppCompatActivity implements View.OnC
             Log.e("UnrecoverableKeyException", "UnrecoverableKeyException" + e.getMessage());
         }   catch (CertificateException e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
 
@@ -194,7 +192,7 @@ public class MainHostHttpsActivity extends AppCompatActivity implements View.OnC
         mediaPlayer1.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
 
-       mediaPlayer1.setDataSource("https://localhost:4477");
+       mediaPlayer1.setDataSource("https://media.assets.bdqn.cn:4477/");
 
        //mediaPlayer1.setDataSource("http://test.bdqn:4477/test/1102/test/segments.key");
 
